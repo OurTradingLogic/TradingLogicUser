@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/a754c216-4829-4539-a56f-88c64e7c4ac3/resourceGroups/tradingLogicResourceGroup/providers/Microsoft.Web/sites/ourTradingLogicUIApp",
+    "appService.deploySubpath": "src/app"
+}
