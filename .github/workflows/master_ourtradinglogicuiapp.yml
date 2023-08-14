@@ -22,6 +22,9 @@ jobs:
           dotnet-version: '7.x'
           include-prerelease: true
 
+      - name: Clean with dotnet
+        run: dotnet clean 'src/app/app.csproj'
+
       - name: Build with dotnet
         run: dotnet build 'src/app/app.csproj' --configuration Release
 
