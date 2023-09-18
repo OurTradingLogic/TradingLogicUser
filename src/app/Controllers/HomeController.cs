@@ -4,6 +4,7 @@ using app.Models;
 using Repository;
 using app.Services;
 using app.Services.Models;
+using app.Services.Helpers;
 using System.Web;
 
 namespace app.Controllers;
@@ -13,15 +14,13 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly ITradingLogicRepository _tradingLogicRepository;
     private readonly ITradingLogicService _tradingLogicService;
-    private readonly ITradingLogicClientService _tradingLogicClientService;
     private readonly ICacheService _cacheService;
 
-    public HomeController(ILogger<HomeController> logger, ITradingLogicRepository tradingLogicRepository, ITradingLogicService tradingLogicService, ITradingLogicClientService tradingLogicClientService, ICacheService cacheService)
+    public HomeController(ILogger<HomeController> logger, ITradingLogicRepository tradingLogicRepository, ITradingLogicService tradingLogicService, ICacheService cacheService)
     {
         _logger = logger;
         _tradingLogicRepository = tradingLogicRepository;
         _tradingLogicService = tradingLogicService;
-        _tradingLogicClientService = tradingLogicClientService;
         _cacheService = cacheService;
     }
 
@@ -60,37 +59,43 @@ public class HomeController : Controller
 
         if (indicatorSignalCustomList.Count == 0)
         {
-            var response = await _tradingLogicClientService.GetSignalBasedOnIndicator();
-            if (response.StockSignalList != null)
-            {
-                string stockName = string.Empty;
-                IEnumerable<SignalDetail> signalDetailList;
-                foreach (var stockSignal in response.StockSignalList)
-                {
-                    foreach (var stock in stockSignal)
-                    {
-                        stockName = stock.Key;
-                        IndicatorSignalCustomView indicatorSignalCustomView1 = new();
-                        indicatorSignalCustomView1.Stock = stockName;
-                        indicatorSignalCustomList.Add(indicatorSignalCustomView1);
+            var indicatorSignalCustomView = await _tradingLogicService.GetIndicatorSignalCustomView();
 
-                        signalDetailList = stock.Value;
-                        foreach (var signalDetail in signalDetailList)
-                        {
-                            IndicatorSignalCustomView indicatorSignalCustomView2 = new();
-                            indicatorSignalCustomView2.Stock = stockName;
-                            indicatorSignalCustomView2.Tool = signalDetail.Tool;
-                            indicatorSignalCustomView2.Signal = signalDetail.Signal;
-                            indicatorSignalCustomView2.Price = signalDetail.Price;
-                            //indicatorSignalCustomView2.OnDate = signalDetail.OnDate;
-                            indicatorSignalCustomView2.Date = signalDetail.Date;
-                            indicatorSignalCustomList.Add(indicatorSignalCustomView2);
-                        }
-                    }
-                }
-            
-                _cacheService.SetTradingList<List<IndicatorSignalCustomView>>("Key", indicatorSignalCustomList);
+            if (indicatorSignalCustomView.Any())
+            {
+                _cacheService.SetTradingList<List<IndicatorSignalCustomView>>("Key", indicatorSignalCustomView);
             }
+            // var response = await _tradingLogicClientService.GetSignalBasedOnIndicator();
+            // if (response.StockSignalList != null)
+            // {
+            //     string stockName = string.Empty;
+            //     IEnumerable<SignalDetail> signalDetailList;
+            //     foreach (var stockSignal in response.StockSignalList)
+            //     {
+            //         foreach (var stock in stockSignal)
+            //         {
+            //             stockName = stock.Key;
+            //             IndicatorSignalCustomView indicatorSignalCustomView1 = new();
+            //             indicatorSignalCustomView1.Stock = stockName;
+            //             indicatorSignalCustomList.Add(indicatorSignalCustomView1);
+
+            //             signalDetailList = stock.Value;
+            //             foreach (var signalDetail in signalDetailList)
+            //             {
+            //                 IndicatorSignalCustomView indicatorSignalCustomView2 = new();
+            //                 indicatorSignalCustomView2.Stock = stockName;
+            //                 indicatorSignalCustomView2.Tool = signalDetail.Tool;
+            //                 indicatorSignalCustomView2.Signal = signalDetail.Signal;
+            //                 indicatorSignalCustomView2.Price = signalDetail.Price;
+            //                 //indicatorSignalCustomView2.OnDate = signalDetail.OnDate;
+            //                 indicatorSignalCustomView2.Date = signalDetail.Date;
+            //                 indicatorSignalCustomList.Add(indicatorSignalCustomView2);
+            //             }
+            //         }
+            //     }
+            
+            //     _cacheService.SetTradingList<List<IndicatorSignalCustomView>>("Key", indicatorSignalCustomList);
+            // }
         }
 
         if (!String.IsNullOrEmpty(searchString))

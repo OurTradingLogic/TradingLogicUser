@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace app.Services.Models;
+
 public class StockSignalList
 {
     public List<Stock> StockList {get; set;} = new();

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Runtime.Caching;
 
-namespace app.Services
+namespace app.Services.Helpers
 {
     public interface ICacheService
     {

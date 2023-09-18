@@ -1,4 +1,5 @@
 namespace app.Services.Models;
+
 public class SignalAPI
 {
     public string Name {get; set;} = string.Empty;

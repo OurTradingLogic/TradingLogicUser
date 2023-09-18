@@ -14,28 +14,24 @@ namespace app.Services
 {
     public interface ITradingLogicClientService
     {
-        Task<IndicatorSignalResponse> GetSignalBasedOnIndicator();
+        Task<IndicatorSignalResponse> GetSignalBasedOnIndicator(StockSignalList stockSignalList);
     }
 
     public class TradingLogicClientService: ITradingLogicClientService
     {
         private readonly ILogger<TradingLogicClientService> _logger;
         private readonly ITradingLogicRepository _tradingLogicRepository;
-        private readonly ITradingLogicService _tradingLogicService;
         private readonly IConfiguration _configuration;
 
-        public TradingLogicClientService(ILogger<TradingLogicClientService> logger, ITradingLogicRepository tradingLogicRepository, ITradingLogicService tradingLogicService, IConfiguration configuration)
+        public TradingLogicClientService(ILogger<TradingLogicClientService> logger, ITradingLogicRepository tradingLogicRepository, IConfiguration configuration)
         {
             _logger = logger;
             _tradingLogicRepository = tradingLogicRepository;
-            _tradingLogicService = tradingLogicService;
             _configuration = configuration;
         }
 
-        public async Task<IndicatorSignalResponse> GetSignalBasedOnIndicator()
+        public async Task<IndicatorSignalResponse> GetSignalBasedOnIndicator(StockSignalList stockSignalList)
         {
-            StockSignalList stockSignalList = await _tradingLogicService.GetSignalAndSignalList();
-
             string? apiServer = "http://127.0.0.1:5000";
             //azure call
             apiServer = _configuration.GetValue<string>("TradingLogicAPI");

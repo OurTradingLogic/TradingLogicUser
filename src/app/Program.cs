@@ -2,6 +2,7 @@ using Database;
 using Repository;
 using Microsoft.EntityFrameworkCore;
 using app.Services;
+using app.Services.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
