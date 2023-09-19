@@ -11,6 +11,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<ITradingLogicRepository, TradingLogicRepository>();
 builder.Services.AddTransient<ITradingLogicService, TradingLogicService>();
 builder.Services.AddTransient<ITradingLogicClientService, TradingLogicClientService>();
+builder.Services.AddTransient<IHttpService, HttpService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddDbContext<TradingLogicDbContext>(options => options.UseSqlServer("Server=localhost;Database=TradingLogic;User=SA;Password=Passw0rd;TrustServerCertificate=True;"));
 

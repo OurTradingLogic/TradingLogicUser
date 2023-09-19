@@ -6,7 +6,6 @@ using app.Models;
 using Repository;
 using app.Services;
 using System.Text.Json;
-//using DbModel = Database.Models;
 using app.Services.Models;
 using DbModel = Database.Models;
 
@@ -20,14 +19,14 @@ namespace app.Services
     public class TradingLogicClientService: ITradingLogicClientService
     {
         private readonly ILogger<TradingLogicClientService> _logger;
-        private readonly ITradingLogicRepository _tradingLogicRepository;
         private readonly IConfiguration _configuration;
+        private readonly IHttpService _httpService;
 
-        public TradingLogicClientService(ILogger<TradingLogicClientService> logger, ITradingLogicRepository tradingLogicRepository, IConfiguration configuration)
+        public TradingLogicClientService(ILogger<TradingLogicClientService> logger, IConfiguration configuration, IHttpService httpService)
         {
             _logger = logger;
-            _tradingLogicRepository = tradingLogicRepository;
             _configuration = configuration;
+            _httpService = httpService;
         }
 
         public async Task<IndicatorSignalResponse> GetSignalBasedOnIndicator(StockSignalList stockSignalList)
@@ -42,7 +41,8 @@ namespace app.Services
             string strJson = JsonSerializer.Serialize<StockSignalList>(stockSignalList);
             string apiURL = apiServer + "/getsignal-basedonindicator";
 
-            HttpClient client = new HttpClient();
+            //HttpClient client = new HttpClient();
+            var client = _httpService;
             var result = await client.PostAsJsonAsync(apiURL, strJson);
 
             IndicatorSignalResponse stockSignalResponse = new();
