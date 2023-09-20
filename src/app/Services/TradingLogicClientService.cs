@@ -14,6 +14,7 @@ namespace app.Services
     public interface ITradingLogicClientService
     {
         Task<IndicatorSignalResponse> GetSignalBasedOnIndicator(StockSignalList stockSignalList);
+        Task<StockLiveDetailsResponse> GetStockLiveDetails(StockSignalList stockSignalList);
     }
 
     public class TradingLogicClientService: ITradingLogicClientService
@@ -59,6 +60,38 @@ namespace app.Services
             }
 
             return stockSignalResponse;
+        }
+
+        public async Task<StockLiveDetailsResponse> GetStockLiveDetails(StockSignalList stockSignalList)
+        {
+            string? apiServer = "http://127.0.0.1:5000";
+            //azure call
+            apiServer = _configuration.GetValue<string>("TradingLogicAPI");
+
+            if (string.IsNullOrEmpty(apiServer))
+                apiServer = "http://127.0.0.1:5000";
+
+            string strJson = JsonSerializer.Serialize<StockSignalList>(stockSignalList);
+            string apiURL = apiServer + "/getstocks-livedetails";
+
+            //HttpClient client = new HttpClient();
+            var client = _httpService;
+            var result = await client.PostAsJsonAsync(apiURL, strJson);
+
+            StockLiveDetailsResponse stockLiveResponse = new();
+
+            string jsonResponse = result.Content.ReadAsStringAsync().Result;
+
+            //var response = "[{\n  \"AEGISCHEM.NS\": [\n {\n      \"Price\": 317.45    }\n  ]\n}\n]";
+
+            if (!string.IsNullOrEmpty(jsonResponse))
+            {
+                //string response = "[" +jsonResponse+ "]";
+                var output = JsonSerializer.Deserialize<Dictionary<string, StockLiveDetail>>(jsonResponse);
+                stockLiveResponse.StockLiveDetails = output;
+            }
+
+            return stockLiveResponse;
         }
     }
 }

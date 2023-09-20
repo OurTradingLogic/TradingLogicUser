@@ -26,6 +26,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\app\app.csproj" />
+    <ProjectReference Include="..\Repository\Repository.csproj" />
+    <ProjectReference Include="..\Database\Database.csproj" />
   </ItemGroup>
 
 </Project>

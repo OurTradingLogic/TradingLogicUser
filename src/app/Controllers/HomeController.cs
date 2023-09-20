@@ -32,23 +32,6 @@ public class HomeController : Controller
             pageNumber = 1;
         }
 
-        // var test = _tradingLogicRepository.GetStockList().Result;
-
-        // HttpClient client = new HttpClient();
-        // var result = client.GetAsync("http://127.0.0.1:5000/get-user/4768");
-
-
-        // var res = result.Result.Content.ReadAsStringAsync().Result;
-
-
-        // List<SignalAPI> signalAPIList = new();
-        // var signalAPIListFromDB = _tradingLogicRepository.GetSignalAPI().Result;
-        // foreach(var signalAPI in signalAPIListFromDB)
-        // {
-        //     signalAPIList.Add(new SignalAPI(){ Name = signalAPI.Name, URL = signalAPI.URL });
-        // }
-        // ViewData["SignalAPIList"] = signalAPIList;
-
         List<IndicatorSignalCustomView> indicatorSignalCustomList = new List<IndicatorSignalCustomView>();
 
         var indicatorSignalCustomListFromCache = _cacheService.GetTradingList<List<IndicatorSignalCustomView>>("Key");
@@ -65,37 +48,6 @@ public class HomeController : Controller
             {
                 _cacheService.SetTradingList<List<IndicatorSignalCustomView>>("Key", indicatorSignalCustomView);
             }
-            // var response = await _tradingLogicClientService.GetSignalBasedOnIndicator();
-            // if (response.StockSignalList != null)
-            // {
-            //     string stockName = string.Empty;
-            //     IEnumerable<SignalDetail> signalDetailList;
-            //     foreach (var stockSignal in response.StockSignalList)
-            //     {
-            //         foreach (var stock in stockSignal)
-            //         {
-            //             stockName = stock.Key;
-            //             IndicatorSignalCustomView indicatorSignalCustomView1 = new();
-            //             indicatorSignalCustomView1.Stock = stockName;
-            //             indicatorSignalCustomList.Add(indicatorSignalCustomView1);
-
-            //             signalDetailList = stock.Value;
-            //             foreach (var signalDetail in signalDetailList)
-            //             {
-            //                 IndicatorSignalCustomView indicatorSignalCustomView2 = new();
-            //                 indicatorSignalCustomView2.Stock = stockName;
-            //                 indicatorSignalCustomView2.Tool = signalDetail.Tool;
-            //                 indicatorSignalCustomView2.Signal = signalDetail.Signal;
-            //                 indicatorSignalCustomView2.Price = signalDetail.Price;
-            //                 //indicatorSignalCustomView2.OnDate = signalDetail.OnDate;
-            //                 indicatorSignalCustomView2.Date = signalDetail.Date;
-            //                 indicatorSignalCustomList.Add(indicatorSignalCustomView2);
-            //             }
-            //         }
-            //     }
-            
-            //     _cacheService.SetTradingList<List<IndicatorSignalCustomView>>("Key", indicatorSignalCustomList);
-            // }
         }
 
         if (!String.IsNullOrEmpty(searchString))
@@ -103,11 +55,7 @@ public class HomeController : Controller
             indicatorSignalCustomList = indicatorSignalCustomList.Where(s => s.Stock.Contains(searchString)).ToList();
         }
 
-        //var signalStock = _tradingLogicService.StockSignalList().Result;
-        //return View(indicatorSignalCustomList);
-
         int pageSize = 10;
-        //var indicatorSignalCustomQuery = indicatorSignalCustomList.AsQueryable().Where(t=> 1==1);
         return View(PaginatedList<IndicatorSignalCustomView>.CreateAsync(indicatorSignalCustomList, pageNumber ?? 1, pageSize));
     }
 

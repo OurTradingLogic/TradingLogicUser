@@ -5,4 +5,5 @@ public interface ITradingLogicService
 {
     Task<StockSignalResponse> StockSignalList();
     Task<List<IndicatorSignalCustomView>> GetIndicatorSignalCustomView();
+    Task<List<StockTransactionReport>> GetStockTransactionDetails();
 }

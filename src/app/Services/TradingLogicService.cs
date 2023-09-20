@@ -25,7 +25,7 @@ public class TradingLogicService: ITradingLogicService
     {
         IEnumerable<DbModel.Stock> stockList = await _tradingLogicRepository.GetStockList();
         IEnumerable<DbModel.SignalAPI> signalAPI = await _tradingLogicRepository.GetSignalAPI();
-        IEnumerable<DbModel.TransactionHistory> transactionHistory = await _tradingLogicRepository.GetTransactionHistory();
+        IEnumerable<DbModel.StockTransactionDetails> stockTransactionDetails = await _tradingLogicRepository.GetStockTransactionDetails();
 
         StockSignalResponse stockSignalResponse = new();
 
@@ -40,8 +40,8 @@ public class TradingLogicService: ITradingLogicService
                 stockSignal.SignalAPI.Add(new SignalAPI { Name = signal.Name, URL = signal.URL});
             }
 
-            int holdingBuy = transactionHistory.Where(t=>t.StockId==stock.Id && t.Type=="BUY").Sum(t=>t.Quantity);
-            int holdingSell = transactionHistory.Where(t=>t.StockId==stock.Id && t.Type=="SELL").Sum(t=>t.Quantity);
+            int holdingBuy = stockTransactionDetails.Where(t=>t.StockId==stock.Id && t.Type=="BUY").Sum(t=>t.Quantity);
+            int holdingSell = stockTransactionDetails.Where(t=>t.StockId==stock.Id && t.Type=="SELL").Sum(t=>t.Quantity);
             int holding = holdingBuy - holdingSell;
             stockSignal.Holding=holding;
 
@@ -100,5 +100,23 @@ public class TradingLogicService: ITradingLogicService
         }
 
         return indicatorSignalCustomList;
+    }
+
+    public async Task<List<StockTransactionReport>> GetStockTransactionDetails()
+    {
+        StockSignalList stockSignalList = await GetSignalAndSignalList();
+        StockLiveDetailsResponse stockLiveDetailsResponse = await _tradingLogicClientService.GetStockLiveDetails(stockSignalList);
+        IEnumerable<DbModel.StockTransactionDetails> transactionListDB = await _tradingLogicRepository.GetStockTransactionDetails();
+
+        var stockTransactionReports = transactionListDB.GroupBy(a=> new { a.StockName }).Select(s => new StockTransactionReport()
+        {
+            Stock = s.Key.StockName,
+            Holding = s.Where(x=> x.Type == "Buy").Sum(x=> x.Quantity) - s.Where(x=> x.Type == "Sell").Sum(x=> x.Quantity),
+            AvgPrice = (s.Where(x=> x.Type == "Buy").Sum(x=> x.Price) - s.Where(x=> x.Type == "Sell").Sum(x=> x.Price))/(s.Where(x=> x.Type == "Buy").Sum(x=> x.Quantity) - s.Where(x=> x.Type == "Sell").Sum(x=> x.Quantity)),
+            CurrentPrice = stockLiveDetailsResponse.StockLiveDetails.ContainsKey(s.Key.StockName)?stockLiveDetailsResponse.StockLiveDetails[s.Key.StockName].Price:null,
+            Profit = s.Where(x=> x.Type == "Sell").Sum(x=> x.Profit??0)
+        }).ToList();
+
+        return stockTransactionReports;
     }
 }

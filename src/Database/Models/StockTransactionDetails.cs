@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Database.Models;
 
-[Table("TransactionHistory")]
-public class TransactionHistory
+[Table("StockTransactionDetails")]
+public class StockTransactionDetails
 {
     [Key]
     public int Id {get; set;}
@@ -13,7 +13,11 @@ public class TransactionHistory
 
     public int StockId {get;set;} 
 
-    [StringLength(50)]
+    [StringLength(100)]
+    [Required]
+    public string StockName {get;set;} = string.Empty;
+
+    [StringLength(20)]
     [Required]
     public string Type {get;set;} = string.Empty; 
 
@@ -22,7 +26,9 @@ public class TransactionHistory
     [Required]
     public DateTime DateAndTime {get;set;} 
 
-    public double Amount {get;set;} 
+    public double Price {get;set;} 
+
+    public double? Profit {get;set;} 
 
     [StringLength(50)]
     public string? ExtraDetail {get;set;}

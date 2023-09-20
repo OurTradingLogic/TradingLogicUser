@@ -151,9 +151,9 @@ public class TradingLogicRepository: ITradingLogicRepository
         return result;
     }
 
-    public async Task<IEnumerable<TransactionHistory>> GetTransactionHistory(int userId = 1)
+    public async Task<IEnumerable<StockTransactionDetails>> GetStockTransactionDetails(int userId = 1)
     {
-        var result = await _tradingLogicDbContext.TransactionHistory.AsNoTracking().Where(x => x.UserId==userId).ToListAsync();
+        var result = await _tradingLogicDbContext.StockTransactionDetails.AsNoTracking().Where(x => x.UserId==userId).ToListAsync();
 
         return result;
     }

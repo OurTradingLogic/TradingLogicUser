@@ -20,5 +20,5 @@ public class TradingLogicDbContext: DbContext
 
     public virtual DbSet<SignalAPI> SignalAPI {get; set;}
 
-    public virtual DbSet<TransactionHistory> TransactionHistory {get; set;}
+    public virtual DbSet<StockTransactionDetails> StockTransactionDetails {get; set;}
 }
