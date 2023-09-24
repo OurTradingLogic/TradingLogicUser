@@ -153,9 +153,42 @@ public class TradingLogicRepository: ITradingLogicRepository
 
     public async Task<IEnumerable<StockTransactionDetails>> GetStockTransactionDetails(int userId = 1)
     {
-        var result = await _tradingLogicDbContext.StockTransactionDetails.AsNoTracking().Where(x => x.UserId==userId).ToListAsync();
+        var result = await _tradingLogicDbContext.StockTransactionDetails.AsNoTracking().Where(x => x.UserId==userId)?.ToListAsync();
 
         return result;
+    }
+
+    public async Task PopulateStockTransactionDetails(string stockName, string transType, int quantity, double price = 0, double? avgPrice = null, int userId = 1)
+    {
+        double profit = 0;
+
+        if (transType == "Sell")
+        {
+            double calAvgPrice = avgPrice??price;
+            if (avgPrice == null)
+            {
+                var getStockTransactionDetails = await GetStockTransactionDetails();
+                calAvgPrice = getStockTransactionDetails.Where(s=> s.StockName == stockName && s.Type == "Buy")
+                                .GroupBy(g => g.StockName).Select(s=> s.Average(x=>x.Price)).FirstOrDefault();
+            }
+
+            profit = price - calAvgPrice;
+        }
+
+        StockTransactionDetails stockTransactionDetails = new StockTransactionDetails(){
+            UserId = userId,
+            StockId = 0,
+            StockName = stockName,
+            Type = transType,
+            Quantity = quantity,
+            DateAndTime = DateTime.Now,
+            Price = price > 0 ? price * quantity : 0,
+            Profit = profit
+        };
+
+        _tradingLogicDbContext.StockTransactionDetails.Add(stockTransactionDetails);
+
+        await _tradingLogicDbContext.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<Users>> GetUsers()

@@ -59,6 +59,39 @@ public class HomeController : Controller
         return View(PaginatedList<IndicatorSignalCustomView>.CreateAsync(indicatorSignalCustomList, pageNumber ?? 1, pageSize));
     }
 
+    public async Task<IActionResult> StockTransactionReport(string searchString, int? pageNumber)
+    {
+        ViewData["CurrentFilter"] = searchString;
+        if (searchString != null)
+        {
+            pageNumber = 1;
+        }
+
+        List<StockTransactionReportView> stockTransactionReportList = await _tradingLogicService.GetStockTransactionDetails();
+
+        if (!String.IsNullOrEmpty(searchString))
+        {
+            stockTransactionReportList = stockTransactionReportList.Where(s => s.Stock.Contains(searchString)).ToList();
+        }
+
+        int pageSize = 10;
+        return View(PaginatedList<StockTransactionReportView>.CreateAsync(stockTransactionReportList, pageNumber ?? 1, pageSize));
+    }
+
+    public async Task<IActionResult> Buy(string stock, double price)
+    {
+        await _tradingLogicService.PopulateStockTransactionDetails(stock, "Buy", 1, price);
+
+        return View();
+    } 
+
+    public async Task<IActionResult> Sell(string stock, double price, double avgPrice)
+    {
+        await _tradingLogicService.PopulateStockTransactionDetails(stock, "Sell", 1, price, avgPrice);
+
+        return View();
+    } 
+
     public IActionResult Privacy()
     {
         return View();

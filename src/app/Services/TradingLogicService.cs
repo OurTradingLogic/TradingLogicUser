@@ -68,6 +68,7 @@ public class TradingLogicService: ITradingLogicService
         List<IndicatorSignalCustomView> indicatorSignalCustomList = new List<IndicatorSignalCustomView>();
 
         StockSignalList stockSignalList = await GetSignalAndSignalList();
+        StockLiveDetailsResponse stockLiveDetailsResponse = await _tradingLogicClientService.GetStockLiveDetails(stockSignalList);
         var response = await _tradingLogicClientService.GetSignalBasedOnIndicator(stockSignalList);
 
         if (response.StockSignalList != null)
@@ -79,20 +80,25 @@ public class TradingLogicService: ITradingLogicService
                 foreach (var stock in stockSignal)
                 {
                     stockName = stock.Key;
-                    IndicatorSignalCustomView indicatorSignalCustomView1 = new();
-                    indicatorSignalCustomView1.Stock = stockName;
+                    IndicatorSignalCustomView indicatorSignalCustomView1 = new()
+                    {
+                        Stock = stockName
+                    };
                     indicatorSignalCustomList.Add(indicatorSignalCustomView1);
 
                     signalDetailList = stock.Value;
+                    double? currentPrice = stockLiveDetailsResponse.StockLiveDetails.ContainsKey(stockName)?stockLiveDetailsResponse.StockLiveDetails[stockName].Price: null;
                     foreach (var signalDetail in signalDetailList)
                     {
-                        IndicatorSignalCustomView indicatorSignalCustomView2 = new();
-                        indicatorSignalCustomView2.Stock = stockName;
-                        indicatorSignalCustomView2.Tool = signalDetail.Tool;
-                        indicatorSignalCustomView2.Signal = signalDetail.Signal;
-                        indicatorSignalCustomView2.Price = signalDetail.Price;
-                        //indicatorSignalCustomView2.OnDate = signalDetail.OnDate;
-                        indicatorSignalCustomView2.Date = signalDetail.Date;
+                        IndicatorSignalCustomView indicatorSignalCustomView2 = new()
+                        {
+                            Stock = stockName,
+                            Tool = signalDetail.Tool,
+                            Signal = signalDetail.Signal,
+                            Price = signalDetail.Price,
+                            Date = signalDetail.Date,
+                            CurrentPrice = Math.Round(currentPrice??0, 2) 
+                        };
                         indicatorSignalCustomList.Add(indicatorSignalCustomView2);
                     }
                 }
@@ -102,13 +108,13 @@ public class TradingLogicService: ITradingLogicService
         return indicatorSignalCustomList;
     }
 
-    public async Task<List<StockTransactionReport>> GetStockTransactionDetails()
+    public async Task<List<StockTransactionReportView>> GetStockTransactionDetails()
     {
         StockSignalList stockSignalList = await GetSignalAndSignalList();
         StockLiveDetailsResponse stockLiveDetailsResponse = await _tradingLogicClientService.GetStockLiveDetails(stockSignalList);
         IEnumerable<DbModel.StockTransactionDetails> transactionListDB = await _tradingLogicRepository.GetStockTransactionDetails();
 
-        var stockTransactionReports = transactionListDB.GroupBy(a=> new { a.StockName }).Select(s => new StockTransactionReport()
+        var stockTransactionReports = transactionListDB.GroupBy(a=> new { a.StockName }).Select(s => new StockTransactionReportView()
         {
             Stock = s.Key.StockName,
             Holding = s.Where(x=> x.Type == "Buy").Sum(x=> x.Quantity) - s.Where(x=> x.Type == "Sell").Sum(x=> x.Quantity),
@@ -118,5 +124,11 @@ public class TradingLogicService: ITradingLogicService
         }).ToList();
 
         return stockTransactionReports;
+    }
+
+    public async Task PopulateStockTransactionDetails(string stockName, string transType, int quantity, double price = 0, double? avgPrice = null)
+    {
+
+        await _tradingLogicRepository.PopulateStockTransactionDetails(stockName, transType, quantity, price, avgPrice);
     }
 }

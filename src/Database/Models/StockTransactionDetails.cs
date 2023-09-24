@@ -26,8 +26,10 @@ public class StockTransactionDetails
     [Required]
     public DateTime DateAndTime {get;set;} 
 
+    /* Total Price, based on Quantity */
     public double Price {get;set;} 
 
+    /* This field is null, since sell type only have profit value */
     public double? Profit {get;set;} 
 
     [StringLength(50)]

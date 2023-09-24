@@ -1,0 +1,93 @@
+@model app.Services.PaginatedList<app.Services.Models.StockTransactionReportView>
+@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Transactions";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="text-center">
+
+@if (Model.Any())
+{
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by name: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-action="Index">Reset</a>
+        </p>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().Stock)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().Holding)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().AvgPrice)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().CurrentPrice)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().Profit)
+                </th>
+                <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Stock)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Holding)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AvgPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CurrentPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Profit)
+            </td>
+            <td>
+                @if (@item.Holding > 0)
+                {
+                    <a asp-action="Sell" asp-route-stock="@item.Stock" asp-route-price="@item.CurrentPrice" asp-route-avgPrice="@item.AvgPrice">Sell</a>
+                }
+                else
+                {
+                    <a disabled>Sell</a>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+
+<a asp-action="Index"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
+}
+</div>

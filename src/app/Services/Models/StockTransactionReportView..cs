@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace app.Services.Models;
 
-public class StockTransactionReport
+public class StockTransactionReportView
 {
     public string Stock{get; set;} = string.Empty;
     public int Holding { get; set; }
@@ -13,8 +13,3 @@ public class StockTransactionReport
     public double? CurrentPrice { get; set; }
     public double? Profit { get; set; }
 }
-
-// public class StockTransactionDetailsView
-// {
-//     public Dictionary<string, StockTransaction>? StockTransactionList {get; set;} = new();
-// }

@@ -1,4 +1,4 @@
-namespace Tests;
+namespace Tests.Data;
 
 public static class TestDataConstants
 {
