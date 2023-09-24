@@ -5,21 +5,18 @@ using Repository;
 using app.Services;
 using app.Services.Models;
 using app.Services.Helpers;
-using System.Web;
 
 namespace app.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly ITradingLogicRepository _tradingLogicRepository;
     private readonly ITradingLogicService _tradingLogicService;
     private readonly ICacheService _cacheService;
 
-    public HomeController(ILogger<HomeController> logger, ITradingLogicRepository tradingLogicRepository, ITradingLogicService tradingLogicService, ICacheService cacheService)
+    public HomeController(ILogger<HomeController> logger, ITradingLogicService tradingLogicService, ICacheService cacheService)
     {
         _logger = logger;
-        _tradingLogicRepository = tradingLogicRepository;
         _tradingLogicService = tradingLogicService;
         _cacheService = cacheService;
     }
@@ -82,14 +79,14 @@ public class HomeController : Controller
     {
         await _tradingLogicService.PopulateStockTransactionDetails(stock, "Buy", 1, price);
 
-        return View();
+        return Json("Done, Proceed with Back Button");
     } 
 
     public async Task<IActionResult> Sell(string stock, double price, double avgPrice)
     {
         await _tradingLogicService.PopulateStockTransactionDetails(stock, "Sell", 1, price, avgPrice);
 
-        return View();
+        return Json("Done, Proceed with Back Button");
     } 
 
     public IActionResult Privacy()

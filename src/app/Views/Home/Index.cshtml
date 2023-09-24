@@ -69,8 +69,11 @@
             <td>
                 @if (@item.Tool != "")
                 {
-                    <span> @item.CurrentPrice |</span>
-                    <a asp-action="Buy" asp-route-stock="@item.Stock" asp-route-price="@item.CurrentPrice">Buy</a>
+                    <span> @item.CurrentPrice </span>
+                    @if (@item.Signal == "BUY") {
+                        <span> | </span>
+                        <a asp-action="Buy" asp-route-stock="@item.Stock" asp-route-price="@item.CurrentPrice">Buy</a>
+                    }                 
                 }
             </td>
         </tr>
