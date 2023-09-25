@@ -97,7 +97,7 @@ public class TradingLogicService: ITradingLogicService
                             Signal = signalDetail.Signal,
                             Price = signalDetail.Price,
                             Date = signalDetail.Date,
-                            CurrentPrice = Math.Round(currentPrice??0, 2) 
+                            CurrentPrice = currentPrice 
                         };
                         indicatorSignalCustomList.Add(indicatorSignalCustomView2);
                     }

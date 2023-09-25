@@ -16,13 +16,14 @@ public class SignalDetail
 
 public class IndicatorSignalCustomView
 {
+    private double _currentPrice;
     public string Stock {get; set;} = string.Empty;
     public string Tool { get; set; } = string.Empty;
     public string Signal { get; set; } = string.Empty;
     public string Date { get; set; } = string.Empty;
     public string OnDate { get; set; } = string.Empty;
     public double Price { get; set; }
-    public double? CurrentPrice { get; set; }
+    public double? CurrentPrice { get { return Math.Round(_currentPrice, 2); } set { _currentPrice = value??0; } }
 }
 
 public class IndicatorSignalResponse
