@@ -24,6 +24,7 @@ public class IndicatorSignalCustomView
     public string OnDate { get; set; } = string.Empty;
     public double Price { get; set; }
     public double? CurrentPrice { get { return Math.Round(_currentPrice, 2); } set { _currentPrice = value??0; } }
+    public int Quantity { get; set; }
 }
 
 public class IndicatorSignalResponse

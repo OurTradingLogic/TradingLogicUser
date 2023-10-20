@@ -45,8 +45,14 @@
             <td>
                 @if (@item.Tool == "")
                 {
-                @Html.DisplayFor(modelItem => item.Stock)
+                    @* @Html.DisplayFor(modelItem => item.Stock, "", new { id="stockName", name="stockName"}) *@
+                    @* <span id="@("stockName"+item.Stock)">@item.Stock</span> *@
+                    @Html.DisplayFor(modelItem => item.Stock)
                 }
+                @* else
+                {
+                    <span id="stockName" hidden>@item.Stock</span>
+                } *@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Tool)
@@ -67,14 +73,23 @@
                 }
             </td>
             <td>
-                @if (@item.Tool != "")
+                @if (@item.Tool == "")
                 {
-                    <span> @item.CurrentPrice </span>
-                    @if (@item.Signal == "BUY") {
+                    @* <span id="@("currentPrice"+item.Stock)">@item.CurrentPrice</span> *@
+                    <span>@item.CurrentPrice</span>
+                    @* @if (@item.Signal == "BUY") { *@
                         <span> | </span>
-                        <a asp-action="Buy" asp-route-stock="@item.Stock" asp-route-price="@item.CurrentPrice">Buy</a>
-                    }                 
+                        @* <input type="number" id="quantity" name="quantity" min="1" max="100", value="5"> *@
+                        <input type="number" id="@("quantity"+item.Stock)" name="quantity" min="1" max="100", value="5">
+                        <span> : </span> 
+                        @* <a asp-action="Buy" asp-route-stock="@item.Stock" asp-route-price="@item.CurrentPrice">Buy</a> *@
+                        <input id="buyExecute" type="submit" value="Buy" class="btn" style="background-color:green; border-color:white" onclick="BuyExecute('@item.Stock', @item.CurrentPrice)"/>
+                    @* }                  *@
                 }
+                @* else
+                {
+                    <input type="number" id="@("quantity"+item.Stock)" name="quantity" min="1" max="100", value="5">
+                } *@
             </td>
         </tr>
 }
@@ -98,3 +113,23 @@ var nextDisabled = !Model.HasNextPage ? "disabled" : "";
 </a>
 }
 </div>
+
+<script type="text/javascript" language="javascript">
+    function BuyExecute(stockName, currentPrice) {
+        var buyQuantity = $('#quantity'+stockName).val();
+
+        $.ajax({
+                url: '@Url.Action("BuyExecute", "Home")',
+                type: 'GET',
+                data: { stock: stockName, price: currentPrice, quantity: buyQuantity },
+                success: function (result) {
+                    console.log('success')
+                    alert(result)
+                },
+                error: function () {
+                    console.log('falied')
+                }
+            });
+            return false;
+    }
+</script>

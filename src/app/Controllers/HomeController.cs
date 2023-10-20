@@ -49,10 +49,10 @@ public class HomeController : Controller
 
         if (!String.IsNullOrEmpty(searchString))
         {
-            indicatorSignalCustomList = indicatorSignalCustomList.Where(s => s.Stock.Contains(searchString)).ToList();
+            indicatorSignalCustomList = indicatorSignalCustomList.Where(s => s.Stock.ToLower().Contains(searchString.ToLower())).ToList();
         }
 
-        int pageSize = 10;
+        int pageSize = 15;
         return View(PaginatedList<IndicatorSignalCustomView>.CreateAsync(indicatorSignalCustomList, pageNumber ?? 1, pageSize));
     }
 
@@ -75,18 +75,18 @@ public class HomeController : Controller
         return View(PaginatedList<StockTransactionReportView>.CreateAsync(stockTransactionReportList, pageNumber ?? 1, pageSize));
     }
 
-    public async Task<IActionResult> Buy(string stock, double price)
+    public async Task<IActionResult> BuyExecute(string stock, double price, int quantity)
     {
-        await _tradingLogicService.PopulateStockTransactionDetails(stock, "Buy", 1, price);
+        await _tradingLogicService.PopulateStockTransactionDetails(stock, "Buy", quantity, price);
 
-        return Json("Done, Proceed with Back Button");
+        return Json("Buy Succeed");
     } 
 
-    public async Task<IActionResult> Sell(string stock, double price, double avgPrice)
+    public async Task<IActionResult> SellExecute(string stock, double price, double avgPrice, int quantity)
     {
-        await _tradingLogicService.PopulateStockTransactionDetails(stock, "Sell", 1, price, avgPrice);
+        await _tradingLogicService.PopulateStockTransactionDetails(stock, "Sell", quantity, price, avgPrice);
 
-        return Json("Done, Proceed with Back Button");
+        return Json("Sell Succeed");
     } 
 
     public IActionResult Privacy()

@@ -12,5 +12,5 @@ public class StockLiveDetail
 
 public class StockLiveDetailsResponse
 {
-    public Dictionary<string, StockLiveDetail> StockLiveDetails {get; set;} = new();
+    public Dictionary<string, StockLiveDetail> StockLiveDetails {get; set;} = new(StringComparer.InvariantCultureIgnoreCase);
 }

@@ -10,12 +10,12 @@
 
 @if (Model.Any())
 {
-<form asp-action="Index" method="get">
+<form asp-action="StockTransactionReport" method="get">
     <div class="form-actions no-color">
         <p>
             Find by name: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
             <input type="submit" value="Search" class="btn btn-default" /> |
-            <a asp-action="Index">Reset</a>
+            <a asp-action="StockTransactionReport">Reset</a>
         </p>
     </div>
 </form>
@@ -28,6 +28,9 @@
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.FirstOrDefault().Holding)
+                </th>
+                 <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().Sold)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.FirstOrDefault().AvgPrice)
@@ -45,16 +48,22 @@
 @foreach (var item in Model) {
         <tr>
             <td>
+                @* <span id="stockName">@item.Stock</span> *@
                 @Html.DisplayFor(modelItem => item.Stock)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Holding)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.Sold)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.AvgPrice)
+                @* <span id="avgPrice">@item.AvgPrice</span> *@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CurrentPrice)
+                @* <span id="currentPrice">@item.CurrentPrice</span> *@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Profit)
@@ -62,7 +71,12 @@
             <td>
                 @if (@item.Holding > 0)
                 {
-                    <a asp-action="Sell" asp-route-stock="@item.Stock" asp-route-price="@item.CurrentPrice" asp-route-avgPrice="@item.AvgPrice">Sell</a>
+                    @* <a asp-action="Sell" asp-route-stock="@item.Stock" asp-route-price="@item.CurrentPrice" asp-route-avgPrice="@item.AvgPrice">Sell</a> *@
+                    <input type="number" id="quantity" name="quantity" min="1" max="100", value="3">
+                    <span> : </span>
+                    <input id="sellExecute" type="submit" value="Sell" class="btn" style="background-color:red; border-color:white" onclick="SellExecute('@item.Stock', @item.CurrentPrice, @item.AvgPrice)"/>
+                    <span> | </span>
+                    <span> @item.SellSuggestion </span>
                 }
                 else
                 {
@@ -77,13 +91,13 @@
 var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
 var nextDisabled = !Model.HasNextPage ? "disabled" : "";
 
-<a asp-action="Index"
+<a asp-action="StockTransactionReport"
    asp-route-pageNumber="@(Model.PageIndex - 1)"
    asp-route-currentFilter="@ViewData["CurrentFilter"]"
    class="btn btn-default @prevDisabled">
     Previous
 </a>
-<a asp-action="Index"
+<a asp-action="StockTransactionReport"
    asp-route-pageNumber="@(Model.PageIndex + 1)"
    asp-route-currentFilter="@ViewData["CurrentFilter"]"
    class="btn btn-default @nextDisabled">
@@ -91,3 +105,23 @@ var nextDisabled = !Model.HasNextPage ? "disabled" : "";
 </a>
 }
 </div>
+
+<script type="text/javascript" language="javascript">
+    function SellExecute(stockName, currentPrice, avgCurrentPrice) {
+        var sellQuantity = $('#quantity').val();
+      
+        $.ajax({
+                url: '@Url.Action("SellExecute", "Home")',
+                type: 'GET',
+                data: { stock: stockName, price: currentPrice, avgPrice: avgCurrentPrice, quantity: sellQuantity },
+                success: function (result) {
+                    console.log('success')
+                    alert(result)
+                },
+                error: function () {
+                    console.log('falied')
+                }
+            });
+            return false;
+    }
+</script>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Repository;
 using app.Services.Models;
 using DbModel = Database.Models;
+using app.Services.Helpers;
 
 namespace app.Services;
 
@@ -13,12 +14,14 @@ public class TradingLogicService: ITradingLogicService
     private readonly ILogger<TradingLogicService> _logger;
     private readonly ITradingLogicRepository _tradingLogicRepository;
     private readonly ITradingLogicClientService _tradingLogicClientService;
+    private readonly ICacheService _cacheService;
 
-    public TradingLogicService(ILogger<TradingLogicService> logger, ITradingLogicRepository tradingLogicRepository, ITradingLogicClientService tradingLogicClientService)
+    public TradingLogicService(ILogger<TradingLogicService> logger, ITradingLogicRepository tradingLogicRepository, ITradingLogicClientService tradingLogicClientService, ICacheService cacheService)
     {
         _logger = logger;
         _tradingLogicRepository = tradingLogicRepository;
         _tradingLogicClientService = tradingLogicClientService;
+        _cacheService = cacheService;
     }
 
     public async Task<StockSignalResponse> StockSignalList()
@@ -80,14 +83,15 @@ public class TradingLogicService: ITradingLogicService
                 foreach (var stock in stockSignal)
                 {
                     stockName = stock.Key;
+                    double? currentPrice = stockLiveDetailsResponse.StockLiveDetails.ContainsKey(stockName)?stockLiveDetailsResponse.StockLiveDetails[stockName].Price: null;
                     IndicatorSignalCustomView indicatorSignalCustomView1 = new()
                     {
-                        Stock = stockName
+                        Stock = stockName.Replace(".NS", string.Empty),
+                        CurrentPrice = currentPrice
                     };
                     indicatorSignalCustomList.Add(indicatorSignalCustomView1);
 
-                    signalDetailList = stock.Value;
-                    double? currentPrice = stockLiveDetailsResponse.StockLiveDetails.ContainsKey(stockName)?stockLiveDetailsResponse.StockLiveDetails[stockName].Price: null;
+                    signalDetailList = stock.Value;                   
                     foreach (var signalDetail in signalDetailList)
                     {
                         IndicatorSignalCustomView indicatorSignalCustomView2 = new()
@@ -114,13 +118,22 @@ public class TradingLogicService: ITradingLogicService
         StockLiveDetailsResponse stockLiveDetailsResponse = await _tradingLogicClientService.GetStockLiveDetails(stockSignalList);
         IEnumerable<DbModel.StockTransactionDetails> transactionListDB = await _tradingLogicRepository.GetStockTransactionDetails();
 
+        List<IndicatorSignalCustomView> indicatorSignalCustomList = new List<IndicatorSignalCustomView>();
+        var indicatorSignalCustomListFromCache = _cacheService.GetTradingList<List<IndicatorSignalCustomView>>("Key");
+        if (indicatorSignalCustomListFromCache != null && indicatorSignalCustomListFromCache.Count() > 0)
+        {
+            indicatorSignalCustomList = indicatorSignalCustomListFromCache;
+        }
+
         var stockTransactionReports = transactionListDB.GroupBy(a=> new { a.StockName }).Select(s => new StockTransactionReportView()
         {
             Stock = s.Key.StockName,
             Holding = s.Where(x=> x.Type == "Buy").Sum(x=> x.Quantity) - s.Where(x=> x.Type == "Sell").Sum(x=> x.Quantity),
+            Sold = s.Where(x=> x.Type == "Sell").Sum(x=> x.Quantity),
             AvgPrice = (s.Where(x=> x.Type == "Buy").Sum(x=> x.Price) - s.Where(x=> x.Type == "Sell").Sum(x=> x.Price))/(s.Where(x=> x.Type == "Buy").Sum(x=> x.Quantity) - s.Where(x=> x.Type == "Sell").Sum(x=> x.Quantity)),
             CurrentPrice = stockLiveDetailsResponse.StockLiveDetails.ContainsKey(s.Key.StockName)?stockLiveDetailsResponse.StockLiveDetails[s.Key.StockName].Price:null,
-            Profit = s.Where(x=> x.Type == "Sell").Sum(x=> x.Profit??0)
+            Profit = s.Where(x=> x.Type == "Sell").Sum(x=> x.Profit??0),
+            SellSuggestion = indicatorSignalCustomList.Where(i => i.Stock.Contains(s.Key.StockName) && i.Signal.ToLower().Equals("sell")).Count().ToString() +" out of "+ indicatorSignalCustomList.Where(i => i.Stock.Contains(s.Key.StockName)).Count().ToString()
         }).ToList();
 
         return stockTransactionReports;

@@ -117,12 +117,14 @@ public class UnitTest1
         var stock1 = stockTransactionDetails.Where(w=>w.Stock == "AEGISCHEM").FirstOrDefault();
         Assert.NotNull(stock1); 
         Assert.True(stock1.Holding == 3); 
+        Assert.True(stock1.Sold == 1); 
         Assert.True(stock1.Profit == 5); 
         Assert.True((int)stock1.AvgPrice == 6); 
         Assert.True((int)stock1.CurrentPrice == 332); 
         var stock2 = stockTransactionDetails.Where(w=>w.Stock == "APOLLOTYRE").FirstOrDefault();
         Assert.NotNull(stock2); 
         Assert.True(stock2.Holding == 5); 
+        Assert.True(stock2.Sold == 5); 
         Assert.True(stock2.Profit == 5); 
         Assert.True((int)stock2.AvgPrice == 20); 
         Assert.True((int)stock2.CurrentPrice == 374); 
